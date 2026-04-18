@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>학회 이름표 생성기 (3인용)</title>
+
+    <!-- QRCode.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
@@ -10,8 +12,7 @@
         .no-print { padding: 20px; background: #fff; border-bottom: 2px solid #ccc; text-align: center; }
         input { padding: 10px; font-size: 16px; width: 180px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
-        
-        /* A4 설정 */
+
         @page { size: A4; margin: 0; }
         .page {
             width: 210mm; height: 297mm;
@@ -20,28 +21,25 @@
             grid-template-rows: repeat(3, 99mm);
             box-sizing: border-box;
         }
-        
-        /* 1행: 왼쪽(이름표) | 오른쪽(영수증) */
+
         .row {
             display: grid;
             grid-template-columns: 105mm 105mm;
             border-bottom: 1px dashed #bbb;
             box-sizing: border-box;
         }
-        
-        /* 이름표 파트 (왼쪽) */
+
         .nametag-part {
             border-right: 1px dotted #ccc;
             display: flex; flex-direction: column;
-            justify-content: center; align-items: center; /* 가로 세로 정중앙 */
+            justify-content: center; align-items: center;
             padding: 10mm;
             text-align: center;
         }
         .org-text { font-size: 18pt; color: #555; margin-bottom: 5mm; }
         .name-text { font-size: 35pt; font-weight: bold; margin-bottom: 8mm; }
-        .qr-center { margin: 0 auto; } /* QR 정중앙 배치 */
+        .qr-center { margin: 0 auto; }
 
-        /* 영수증 파트 (오른쪽) */
         .receipt-part {
             display: flex; flex-direction: column;
             padding: 15mm 10mm;
@@ -62,36 +60,40 @@
 
 <div class="no-print">
     <h2>학회 이름표/영수증 생성 (A4 3행)</h2>
-    <input type="text" id="nameIn" placeholder="이름 입력" onkeypress="if(event.keyCode==13) {addRow();}">
-    <input type="text" id="orgIn" placeholder="소속 입력" onkeypress="if(event.keyCode==13) {addRow();}">
-    <button onclick="addRow()">추가하기</button>
-    <button onclick="window.print()" style="background: #28a745;">인쇄하기</button>
-    <button onclick="location.reload()" style="background: #dc3545;">초기화</button>
+
+    <!-- 3명 입력칸 -->
+    <div>
+        <input id="name1" value="홍길동">
+        <input id="org1" value="조선 의학연구소"><br>
+
+        <input id="name2" value="손오공">
+        <input id="org2" value="화과산 연구원"><br>
+
+        <input id="name3" value="이몽룡">
+        <input id="org3" value="남원 학회"><br>
+    </div>
+
+    <button onclick="generate()">미리보기 생성</button>
+    <button onclick="window.print()" style="background:#28a745;">인쇄하기</button>
+    <button onclick="location.reload()" style="background:#dc3545;">초기화</button>
 </div>
 
-<div class="page" id="mainPage">
-    <!-- 입력 시 여기에 행이 추가됨 -->
-</div>
+<div class="page" id="mainPage"></div>
 
 <script>
-    let rowCount = 0;
+function generate() {
+    const page = document.getElementById('mainPage');
+    page.innerHTML = ""; // 초기화 후 다시 생성
 
-    function addRow() {
-        const nameNode = document.getElementById('nameIn');
-        const orgNode = document.getElementById('orgIn');
-        const name = nameNode.value.trim();
-        const org = orgNode.value.trim();
+    for (let i = 1; i <= 3; i++) {
+        const name = document.getElementById('name' + i).value.trim();
+        const org = document.getElementById('org' + i).value.trim();
 
-        if (!name || !org) { alert("이름과 소속을 모두 입력하세요!"); return; }
-        if (rowCount >= 3) { alert("한 페이지(3명)가 꽉 찼습니다. 인쇄 후 초기화하세요."); return; }
-
-        rowCount++;
-        const page = document.getElementById('mainPage');
         const row = document.createElement('div');
         row.className = 'row';
-        
-        const qrId = "qr_" + rowCount;
-        const qrContent = `${name};${org}`; // 요청하신 데이터 포맷
+
+        const qrId = "qr_" + i;
+        const qrContent = `${name};${org}`;
 
         row.innerHTML = `
             <div class="nametag-part">
@@ -113,19 +115,14 @@
 
         page.appendChild(row);
 
-        // QR코드 생성 (이름 아래 정중앙)
         new QRCode(document.getElementById(qrId), {
             text: qrContent,
             width: 90,
             height: 90,
             correctLevel: QRCode.CorrectLevel.H
         });
-
-        // ** 입력창 비우기 및 포커스 이동 **
-        nameNode.value = "";
-        orgNode.value = "";
-        nameNode.focus();
     }
+}
 </script>
 
 </body>
