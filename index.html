@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>학회 이름표 및 영수증 출력</title>
+    <script src="https://cloudflare.com"></script>
+    <style>
+        /* A4 용지 설정 */
+        @page {
+            size: A4;
+            margin: 0; /* 프린터 여백은 브라우저 설정에서 '없음' 권장 */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+        /* 2열 3행 그리드 설정 */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 1fr);
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+        }
+        /* 각 이름표 칸 (절단선 기준) */
+        .ticket-slot {
+            border: 1px dashed #ccc; /* 미리보기용 절단선 */
+            display: flex;
+            flex-direction: column;
+            padding: 10mm;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        /* 이름표 영역 (상단) */
+        .name-tag {
+            flex: 1;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5mm;
+        }
+        .name { font-size: 24pt; font-weight: bold; margin-top: 5mm; }
+        .affiliation { font-size: 14pt; color: #555; }
+        
+        /* 영수증 영역 (하단) */
+        .receipt {
+            flex: 1;
+            padding-top: 5mm;
+            font-size: 9pt;
+        }
+        .receipt-title { text-align: center; font-weight: bold; margin-bottom: 2mm; }
+        .qr-code { float: right; width: 40px; height: 40px; }
+
+        @media print {
+            .no-print { display: none; }
+            .ticket-slot { border: none; } /* 실제 인쇄 시 선 제거 가능 */
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="padding: 20px; background: #f0f0f0;">
+        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">인쇄하기</button>
+        <p>* 크롬 인쇄 설정에서 <b>'여백: 없음'</b>, <b>'배경 그래픽 체크'</b>를 해주세요.</p>
+    </div>
+
+    <div class="container">
+        <!-- 첫 번째 칸 (이 예시를 6번 반복) -->
+        <div class="ticket-slot">
+            <div class="name-tag">
+                <div class="affiliation">대한IT학회</div>
+                <div class="name">홍길동 님</div>
+                <div class="role">일반회원</div>
+            </div>
+            <div class="receipt">
+                <div class="receipt-title">[ 등록비 영수증 ]</div>
+                <div>금액: ₩100,000</div>
+                <div>일자: 2024. 05. 20</div>
+                <div id="qrcode1" class="qr-code"></div>
+                <div style="font-size: 8pt; margin-top: 5mm;">위 금액을 정히 영수함.</div>
+            </div>
+        </div>
+        
+        <!-- 필요한 만큼 .ticket-slot 반복 생성 -->
+    </div>
+
+    <script>
+        // QR코드 생성 (예시)
+        new QRCode(document.getElementById("qrcode1"), {
+            text: "REF12345-HONG",
+            width: 40,
+            height: 40
+        });
+    </script>
+</body>
+</html>
