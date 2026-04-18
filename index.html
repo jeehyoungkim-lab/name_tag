@@ -2,52 +2,53 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>학회 3인용 이름표 생성기</title>
+    <title>학회 이름표 생성기 (3인용)</title>
     <script src="https://cloudflare.com"></script>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
         .no-print { padding: 20px; background: #fff; border-bottom: 2px solid #ccc; text-align: center; }
-        input { padding: 10px; font-size: 16px; width: 180px; margin: 5px; }
+        input { padding: 10px; font-size: 16px; width: 180px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
         
-        /* A4 세로 설정 (210 x 297mm) */
+        /* A4 설정 */
         @page { size: A4; margin: 0; }
         .page {
             width: 210mm; height: 297mm;
             background: white; margin: 20px auto;
             display: grid;
-            grid-template-rows: repeat(3, 99mm); /* 3행으로 정확히 분할 */
+            grid-template-rows: repeat(3, 99mm);
             box-sizing: border-box;
         }
         
-        /* 1행 구성 (왼쪽 이름표 / 오른쪽 영수증) */
+        /* 1행: 왼쪽(이름표) | 오른쪽(영수증) */
         .row {
             display: grid;
-            grid-template-columns: 105mm 105mm; /* 가로로 반반 나눔 */
-            border-bottom: 1px dashed #bbb; /* 절단선 */
+            grid-template-columns: 105mm 105mm;
+            border-bottom: 1px dashed #bbb;
             box-sizing: border-box;
         }
         
-        /* 이름표 (왼쪽) */
+        /* 이름표 파트 (왼쪽) */
         .nametag-part {
             border-right: 1px dotted #ccc;
             display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
+            justify-content: center; align-items: center; /* 가로 세로 정중앙 */
             padding: 10mm;
+            text-align: center;
         }
         .org-text { font-size: 18pt; color: #555; margin-bottom: 5mm; }
-        .name-text { font-size: 35pt; font-weight: bold; }
+        .name-text { font-size: 35pt; font-weight: bold; margin-bottom: 8mm; }
+        .qr-center { margin: 0 auto; } /* QR 정중앙 배치 */
 
-        /* 영수증 (오른쪽) */
+        /* 영수증 파트 (오른쪽) */
         .receipt-part {
             display: flex; flex-direction: column;
             padding: 15mm 10mm;
             position: relative;
         }
         .receipt-title { font-size: 16pt; font-weight: bold; text-align: center; border: 2px solid #000; padding: 5px; margin-bottom: 10mm; }
-        .receipt-details { font-size: 11pt; line-height: 2; }
-        .qr-box { position: absolute; right: 15mm; bottom: 15mm; text-align: center; }
-        .qr-label { font-size: 8pt; color: #888; margin-top: 5px; }
+        .receipt-details { font-size: 11pt; line-height: 2.2; }
+        .receipt-footer { margin-top: auto; text-align: center; font-weight: bold; font-size: 12pt; }
 
         @media print {
             .no-print { display: none; }
@@ -59,27 +60,29 @@
 <body>
 
 <div class="no-print">
-    <h2>학회 이름표/영수증 생성 (3인용)</h2>
-    <input type="text" id="nameIn" placeholder="이름">
-    <input type="text" id="orgIn" placeholder="소속">
+    <h2>학회 이름표/영수증 생성 (A4 3행)</h2>
+    <input type="text" id="nameIn" placeholder="이름 입력" onkeypress="if(event.keyCode==13) {addRow();}">
+    <input type="text" id="orgIn" placeholder="소속 입력" onkeypress="if(event.keyCode==13) {addRow();}">
     <button onclick="addRow()">추가하기</button>
     <button onclick="window.print()" style="background: #28a745;">인쇄하기</button>
     <button onclick="location.reload()" style="background: #dc3545;">초기화</button>
 </div>
 
 <div class="page" id="mainPage">
-    <!-- 입력 시 여기에 이름표가 생김 -->
+    <!-- 입력 시 여기에 행이 추가됨 -->
 </div>
 
 <script>
     let rowCount = 0;
 
     function addRow() {
-        const name = document.getElementById('nameIn').value;
-        const org = document.getElementById('orgIn').value;
+        const nameNode = document.getElementById('nameIn');
+        const orgNode = document.getElementById('orgIn');
+        const name = nameNode.value.trim();
+        const org = orgNode.value.trim();
 
-        if (!name || !org) { alert("내용을 입력하세요!"); return; }
-        if (rowCount >= 3) { alert("한 장(3명)이 모두 찼습니다."); return; }
+        if (!name || !org) { alert("이름과 소속을 모두 입력하세요!"); return; }
+        if (rowCount >= 3) { alert("한 페이지(3명)가 꽉 찼습니다. 인쇄 후 초기화하세요."); return; }
 
         rowCount++;
         const page = document.getElementById('mainPage');
@@ -87,12 +90,13 @@
         row.className = 'row';
         
         const qrId = "qr_" + rowCount;
-        const qrContent = name + ";" + org; // 이름;소속 포맷
+        const qrContent = `${name};${org}`; // 요청하신 데이터 포맷
 
         row.innerHTML = `
             <div class="nametag-part">
                 <div class="org-text">${org}</div>
                 <div class="name-text">${name} 님</div>
+                <div id="${qrId}" class="qr-center"></div>
             </div>
             <div class="receipt-part">
                 <div class="receipt-title">등 록 비 영 수 증</div>
@@ -100,28 +104,26 @@
                     • 성 명 : ${name}<br>
                     • 소 속 : ${org}<br>
                     • 금 액 : ￦ 100,000<br>
-                    • 내 역 : 학술대회 등록비
+                    • 내 역 : 학술대회 등록비 및 자료집
                 </div>
-                <div class="qr-box">
-                    <div id="${qrId}"></div>
-                    <div class="qr-label">참가확인 QR</div>
-                </div>
+                <div class="receipt-footer">위 금액을 정히 영수함</div>
             </div>
         `;
 
         page.appendChild(row);
 
-        // QR코드 생성
+        // QR코드 생성 (이름 아래 정중앙)
         new QRCode(document.getElementById(qrId), {
             text: qrContent,
-            width: 80,
-            height: 80
+            width: 90,
+            height: 90,
+            correctLevel: QRCode.CorrectLevel.H
         });
 
-        // 입력칸 비우기
-        document.getElementById('nameIn').value = "";
-        document.getElementById('orgIn').value = "";
-        document.getElementById('nameIn').focus();
+        // ** 입력창 비우기 및 포커스 이동 **
+        nameNode.value = "";
+        orgNode.value = "";
+        nameNode.focus();
     }
 </script>
 
