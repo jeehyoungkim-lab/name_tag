@@ -14,18 +14,19 @@
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
 
         @page { size: A4; margin: 0; }
-        .page {    width: 210mm;
-    display: grid;
-    grid-template-rows: repeat(3, 99mm);
-    background: white;
-    margin: 20px auto;
-}
-
-@media print {
-    .page {
-        height: 297mm; /* 인쇄할 때만 A4 고정 */
-    }
-}
+        .page {
+            width: 210mm;
+            display: grid;
+            grid-template-rows: repeat(3, 99mm);
+            background: white;
+            margin: 20px auto;
+        }
+        
+        @media print {
+            .page {
+                height: 297mm; /* 인쇄할 때만 A4 고정 */
+            }
+        }
 
 
 
