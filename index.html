@@ -16,15 +16,18 @@
         @page { size: A4; margin: 0; }
         .page {
             width: 210mm;
-            display: grid;
-            grid-template-rows: repeat(3, 99mm);
             background: white;
             margin: 20px auto;
+            display: grid;
+            grid-template-rows: repeat(3, 99mm);
+            box-sizing: border-box;
+            height: auto !important;   /* 화면에서는 자동 높이 */
+            min-height: 297mm;
         }
         
         @media print {
             .page {
-                height: 297mm; /* 인쇄할 때만 A4 고정 */
+                height: 297mm !important;  /* 인쇄할 때만 A4 고정 */
             }
         }
 
